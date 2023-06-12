@@ -22,10 +22,14 @@ import jt.projects.gbmaps.R
 import jt.projects.gbmaps.core.MyGeocoder
 import jt.projects.gbmaps.databinding.FragmentMapBinding
 import jt.projects.gbmaps.utils.showSnackbar
+import jt.projects.gbmaps.utils.showSnackbarWithAction
 import jt.projects.gbmaps.viewmodel.MapViewModel
 import org.koin.android.ext.android.inject
 
 class MapFragment : Fragment() {
+    companion object {
+        const val ZOOM_VALUE = 6f
+    }
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -41,7 +45,7 @@ class MapFragment : Fragment() {
 
     @SuppressLint("MissingPermission")
     private val callback = OnMapReadyCallback { googleMap ->
-        val location = LatLng(68.9792, 33.0925)
+
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true // добавить кнопки zoom[+][-]
 
@@ -60,25 +64,31 @@ class MapFragment : Fragment() {
             uiSettings.isMapToolbarEnabled = true
 
             viewModel.liveDataToObserve.observe(viewLifecycleOwner) { markers ->
+                googleMap.clear()
                 markers.forEach {
                     googleMap.addMarker(it)
                 }
             }
 
-            viewModel.addMarker(location, "Marker in Murmansk")
-            moveCamera(CameraUpdateFactory.newLatLng(location))
+            val murmansk = LatLng(68.9792, 33.0925)
+            viewModel.addMarker(murmansk, "Marker in Murmansk")
+            moveCamera(CameraUpdateFactory.newLatLng(murmansk))
 
             setOnMapLongClickListener { location ->
                 viewModel.addMarker(location, geocoder.getCityNameByLocation(location))
             }
 
-
-//                viewModel.removeMarker(it.position)
-//                it.remove()
-//                true
+            setOnMarkerClickListener { marker ->
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.position, ZOOM_VALUE))
+                showSnackbarWithAction(
+                    marker.title.toString(), "Удалить маркер"
+                ) {
+                    viewModel.removeMarker(marker.position)
+                }
+                true
+            }
 
         }
-
 
         map = googleMap
     }
@@ -109,14 +119,13 @@ class MapFragment : Fragment() {
 
                     if (result != null && result.size > 0) {
                         val location = LatLng(result.first().latitude, result.first().longitude)
-                        // setMarker(location, it, R.drawable.ic_map_marker)
-                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 6f))
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, ZOOM_VALUE))
 
                     } else {
                         showSnackbar("Адрес не найден")
                     }
                 } catch (e: Exception) {
-                    showSnackbar("Ошибка: ".plus(e.message))
+                    showSnackbar("Ошибка: ${e.message}")
                 }
             }
         }
@@ -130,10 +139,6 @@ class MapFragment : Fragment() {
         )!!
     }
 
-//    private fun addMarkerToArray(location: LatLng) {
-//        val marker = setMarker(location, markers.size.toString(), R.drawable.ic_map_pin)
-//        markers.add(marker)
-//    }
 
 //    private fun drawLine() {
 //        val last: Int = markers.size - 1

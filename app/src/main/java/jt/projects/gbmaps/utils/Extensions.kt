@@ -42,3 +42,15 @@ fun Fragment.showSnackbar(text: String) {
         Snackbar.LENGTH_SHORT
     ).show()
 }
+
+fun Fragment.showSnackbarWithAction(
+    text: String,
+    actionText: String,
+    action: View.OnClickListener
+) {
+    Snackbar.make(
+        requireActivity().findViewById(android.R.id.content),
+        text,
+        Snackbar.LENGTH_SHORT
+    ).setAction(actionText, action).show()
+}
