@@ -70,10 +70,6 @@ class MapFragment : Fragment() {
                 }
             }
 
-            val murmansk = LatLng(68.9792, 33.0925)
-            viewModel.addMarker(murmansk, "Marker in Murmansk")
-            moveCamera(CameraUpdateFactory.newLatLng(murmansk))
-
             setOnMapLongClickListener { location ->
                 viewModel.addMarker(location, geocoder.getCityNameByLocation(location))
             }
@@ -91,6 +87,13 @@ class MapFragment : Fragment() {
         }
 
         map = googleMap
+        firstInit()
+    }
+
+    private fun firstInit() {
+        val murmansk = LatLng(68.9792, 33.0925)
+        viewModel.addMarker(murmansk, "Marker in Murmansk")
+        map.moveCamera(CameraUpdateFactory.newLatLng(murmansk))
     }
 
     override fun onCreateView(

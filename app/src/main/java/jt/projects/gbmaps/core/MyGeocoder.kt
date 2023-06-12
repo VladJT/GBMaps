@@ -11,11 +11,13 @@ class MyGeocoder(private val context: Context, private val locale: Locale) {
 
     private val geocoder by lazy { Geocoder(context, locale) }
 
-
     fun getCityNameByLocation(location: LatLng): String {
-        val result =
+        return try {
             geocoder.getFromLocation(location.latitude, location.longitude, 1)?.get(0)?.locality
-        return result ?: "no city here: (${location.latitude}, ${location.longitude})"
+                ?: "no city here: (${location.latitude}, ${location.longitude})"
+        } catch (e: Exception) {
+            e.message.toString()
+        }
     }
 
     fun getAddressByLocation(searchAddress: String, maxResults: Int): MutableList<Address>? {
