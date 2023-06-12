@@ -1,5 +1,6 @@
 package jt.projects.gbmaps.viewmodel
 
+import android.icu.text.CaseMap.Title
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,7 +16,9 @@ class MapViewModel : ViewModel() {
         }
 
     init {
-        liveData.value = mutableListOf()
+        liveData.value = mutableListOf(
+            MarkerOptions().title("Marker in Murmansk").position(LatLng(68.9792, 33.0925))
+        )
     }
 
     private fun refreshData() {
@@ -36,4 +39,13 @@ class MapViewModel : ViewModel() {
         refreshData()
     }
 
+    fun editMarker(marker: MarkerOptions, newTitle: String){
+        val index = liveData.value?.indexOf(marker)
+        if (index != null) {
+            liveData.value?.apply {
+                remove(marker)
+                add(MarkerOptions().title(newTitle).position(marker.position))
+            }
+        }
+    }
 }

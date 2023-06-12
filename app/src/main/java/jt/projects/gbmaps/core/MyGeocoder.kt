@@ -3,7 +3,9 @@ package jt.projects.gbmaps.core
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
+import android.util.Log
 import com.google.android.gms.maps.model.LatLng
+import jt.projects.gbmaps.utils.LOG_TAG
 import java.util.Locale
 
 
@@ -16,7 +18,8 @@ class MyGeocoder(private val context: Context, private val locale: Locale) {
             geocoder.getFromLocation(location.latitude, location.longitude, 1)?.get(0)?.locality
                 ?: "no city here: (${location.latitude}, ${location.longitude})"
         } catch (e: Exception) {
-            e.message.toString()
+            Log.d(LOG_TAG, e.message.toString())
+            ""
         }
     }
 

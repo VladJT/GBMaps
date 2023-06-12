@@ -39,7 +39,7 @@ class MapFragment : Fragment() {
     private lateinit var map: GoogleMap
 
     private val viewModel by lazy {
-        ViewModelProvider(this)[MapViewModel::class.java] // переживает создание активити
+        ViewModelProvider(requireActivity())[MapViewModel::class.java] // переживает создание активити
     }
 
 
@@ -87,14 +87,9 @@ class MapFragment : Fragment() {
         }
 
         map = googleMap
-        firstInit()
     }
 
-    private fun firstInit() {
-        val murmansk = LatLng(68.9792, 33.0925)
-        viewModel.addMarker(murmansk, "Marker in Murmansk")
-        map.moveCamera(CameraUpdateFactory.newLatLng(murmansk))
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
