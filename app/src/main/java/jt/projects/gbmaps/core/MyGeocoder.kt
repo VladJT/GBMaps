@@ -13,17 +13,20 @@ class MyGeocoder(private val context: Context, private val locale: Locale) {
 
     private val geocoder by lazy { Geocoder(context, locale) }
 
-    fun getCityNameByLocation(location: LatLng): String {
-        return try {
-            geocoder.getFromLocation(location.latitude, location.longitude, 1)?.get(0)?.locality
-                ?: "no city here: (${location.latitude}, ${location.longitude})"
+    fun getCityNameByLocation(location: LatLng): Address? {
+        var address: Address?  = null
+        try {
+            val result = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+            if(!result.isNullOrEmpty()){
+                address = result[0]
+            }
         } catch (e: Exception) {
             Log.d(LOG_TAG, e.message.toString())
-            ""
         }
+        return address
     }
 
-    fun getAddressByLocation(searchAddress: String, maxResults: Int): MutableList<Address>? {
+    fun getAddressByName(searchAddress: String, maxResults: Int): MutableList<Address>? {
         return geocoder.getFromLocationName(searchAddress, maxResults)
     }
 

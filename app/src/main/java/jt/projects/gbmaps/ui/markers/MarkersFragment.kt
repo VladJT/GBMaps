@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.maps.model.MarkerOptions
 import jt.projects.gbmaps.databinding.FragmentMarkersBinding
+import jt.projects.gbmaps.model.MapMarker
 import jt.projects.gbmaps.utils.ViewModelNotInitException
 import jt.projects.gbmaps.utils.showSnackbar
 import jt.projects.gbmaps.viewmodel.MapViewModel
@@ -24,13 +25,13 @@ class MarkersFragment : Fragment() {
 
     private val markersAdapter: MarkersAdapter by lazy { MarkersAdapter(::onSaveClick, ::onDeleteClick) }
 
-    private fun onSaveClick(data: MarkerOptions, newTitle: String) {
-        viewModel.editMarker(data, newTitle)
+    private fun onSaveClick(data: MapMarker, newTitle: String, newComment: String) {
+        viewModel.editMarker(data, newTitle, newComment)
         showSnackbar("Данные сохранены")
     }
 
-    private fun onDeleteClick(data: MarkerOptions) {
-        viewModel.removeMarker(data.position)
+    private fun onDeleteClick(data: MapMarker) {
+        viewModel.removeMarker(data.markerData.position)
     }
 
 

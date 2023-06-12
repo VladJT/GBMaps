@@ -3,19 +3,19 @@ package jt.projects.gbmaps.ui.markers
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.maps.model.MarkerOptions
 import jt.projects.gbmaps.databinding.ItemMarkerBinding
+import jt.projects.gbmaps.model.MapMarker
 
 class MarkersAdapter(
-    private var onSaveClicked: ((MarkerOptions, String) -> Unit),
-    private var onDeleteClicked: ((MarkerOptions) -> Unit),
+    private var onSaveClicked: ((MapMarker, String, String) -> Unit),
+    private var onDeleteClicked: ((MapMarker) -> Unit),
 ) :
     RecyclerView.Adapter<MarkersAdapter.MarkerViewHolder>() {
 
-    private var data: List<MarkerOptions> = arrayListOf()
+    private var data: List<MapMarker> = arrayListOf()
 
     // Метод передачи данных в адаптер
-    fun setData(data: List<MarkerOptions>) {
+    fun setData(data: List<MapMarker>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -38,16 +38,21 @@ class MarkersAdapter(
 
     inner class MarkerViewHolder(private val binding: ItemMarkerBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: MarkerOptions) {
+        fun bind(data: MapMarker) {
             if (layoutPosition != RecyclerView.NO_POSITION) {
                 with(binding) {
-                    tvLatitude.text = data.position.latitude.toString()
-                    tvLongitude.text = data.position.longitude.toString()
+                    tvLatitude.text = data.markerData.position.latitude.toString()
+                    tvLongitude.text = data.markerData.position.longitude.toString()
 
-                    etMarkerTitle.setText(data.title)
+                    etMarkerTitle.setText(data.markerData.title)
+                    etMarkerComment.setText(data.comment)
 
                     btnSave.setOnClickListener {
-                        onSaveClicked(data, etMarkerTitle.text.toString())
+                        onSaveClicked(
+                            data,
+                            etMarkerTitle.text.toString(),
+                            etMarkerComment.text.toString()
+                        )
                     }
 
                     btnDelete.setOnClickListener {

@@ -14,10 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import jt.projects.gbmaps.R
 import jt.projects.gbmaps.core.MyGeocoder
 import jt.projects.gbmaps.databinding.FragmentMapBinding
@@ -28,7 +25,7 @@ import org.koin.android.ext.android.inject
 
 class MapFragment : Fragment() {
     companion object {
-        const val ZOOM_VALUE = 6f
+        const val ZOOM_VALUE = 3f
     }
 
     private var _binding: FragmentMapBinding? = null
@@ -47,8 +44,6 @@ class MapFragment : Fragment() {
     private val callback = OnMapReadyCallback { googleMap ->
 
         googleMap.apply {
-            uiSettings.isZoomControlsEnabled = true // добавить кнопки zoom[+][-]
-
             if ((ActivityCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -60,22 +55,26 @@ class MapFragment : Fragment() {
             ) {
                 isMyLocationEnabled = true
             }
+
+            uiSettings.isZoomControlsEnabled = true // добавить кнопки zoom[+][-]
             uiSettings.isMyLocationButtonEnabled = true
             uiSettings.isMapToolbarEnabled = true
 
-            viewModel.liveDataToObserve.observe(viewLifecycleOwner) { markers ->
-                googleMap.clear()
-                markers.forEach {
-                    googleMap.addMarker(it)
+            setOnMapLongClickListener { location ->
+                val address = geocoder.getCityNameByLocation(location)
+                if(address==null){
+                    viewModel.addMarker(location,"no city found","")
+                }else {
+                    viewModel.addMarker(
+                        location,
+                        address.subAdminArea ?: address.adminArea ?: "no name found",
+                        "$address"
+                    )
                 }
             }
 
-            setOnMapLongClickListener { location ->
-                viewModel.addMarker(location, geocoder.getCityNameByLocation(location))
-            }
-
             setOnMarkerClickListener { marker ->
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.position, ZOOM_VALUE))
+            //    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.position, ZOOM_VALUE))
                 showSnackbarWithAction(
                     marker.title.toString(), "Удалить маркер"
                 ) {
@@ -87,8 +86,13 @@ class MapFragment : Fragment() {
         }
 
         map = googleMap
+        viewModel.liveDataToObserve.observe(viewLifecycleOwner) { markers ->
+            map.clear()
+            markers.forEach {
+                map.addMarker(it.markerData)
+            }
+        }
     }
-
 
 
     override fun onCreateView(
@@ -113,7 +117,7 @@ class MapFragment : Fragment() {
         binding.buttonSearchAddress.setOnClickListener {
             binding.editTextAddress.text.toString().let {
                 try {
-                    val result = geocoder.getAddressByLocation(it, 1)
+                    val result = geocoder.getAddressByName(it, 1)
 
                     if (result != null && result.size > 0) {
                         val location = LatLng(result.first().latitude, result.first().longitude)
@@ -128,29 +132,6 @@ class MapFragment : Fragment() {
             }
         }
     }
-
-    private fun setMarker(location: LatLng, searchText: String, resId: Int): Marker {
-        return map.addMarker(
-            MarkerOptions().position(location).title(searchText).icon(
-                BitmapDescriptorFactory.fromResource(resId)
-            )
-        )!!
-    }
-
-
-//    private fun drawLine() {
-//        val last: Int = markers.size - 1
-//        if (last >= 1) {
-//            val previous: LatLng = markers[last - 1].position
-//            val current: LatLng = markers[last].position
-//            map.addPolyline(
-//                PolylineOptions()
-//                    .add(previous, current)
-//                    .color(Color.RED)
-//                    .width(15f)
-//            )
-//        }
-//    }
 
 
     override fun onDestroy() {
