@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.maps.model.MarkerOptions
 import jt.projects.gbmaps.databinding.FragmentMarkersBinding
 import jt.projects.gbmaps.model.MapMarker
 import jt.projects.gbmaps.utils.ViewModelNotInitException
@@ -23,7 +22,12 @@ class MarkersFragment : Fragment() {
         ViewModelProvider(requireActivity())[MapViewModel::class.java] // переживает создание активити
     }
 
-    private val markersAdapter: MarkersAdapter by lazy { MarkersAdapter(::onSaveClick, ::onDeleteClick) }
+    private val markersAdapter: MarkersAdapter by lazy {
+        MarkersAdapter(
+            ::onSaveClick,
+            ::onDeleteClick
+        )
+    }
 
     private fun onSaveClick(data: MapMarker, newTitle: String, newComment: String) {
         viewModel.editMarker(data, newTitle, newComment)
@@ -57,7 +61,7 @@ class MarkersFragment : Fragment() {
         }
 
         viewModel.liveDataToObserve.observe(viewLifecycleOwner) {
-           markersAdapter.setData(it)
+            markersAdapter.setData(it)
         }
     }
 

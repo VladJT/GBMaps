@@ -14,10 +14,10 @@ class MyGeocoder(private val context: Context, private val locale: Locale) {
     private val geocoder by lazy { Geocoder(context, locale) }
 
     fun getCityNameByLocation(location: LatLng): Address? {
-        var address: Address?  = null
+        var address: Address? = null
         try {
             val result = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-            if(!result.isNullOrEmpty()){
+            if (!result.isNullOrEmpty()) {
                 address = result[0]
             }
         } catch (e: Exception) {

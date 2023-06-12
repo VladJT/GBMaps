@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="2dp"
-    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,10 +15,12 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_marker_title"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Введите название маркера"
+            android:paddingEnd="4dp"
             app:endIconMode="clear_text"
+            app:layout_constraintEnd_toStartOf="@+id/btn_save"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -27,7 +28,7 @@
                 android:id="@+id/et_marker_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/rv_item_text_size_small" />
+                android:textSize="@dimen/rv_item_text_size_medium" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -45,7 +46,7 @@
                 android:id="@+id/et_marker_comment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/rv_item_text_size_small" />
+                android:textSize="10sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -94,7 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="94dp" />
+            app:layout_constraintGuide_begin="68dp" />
 
         <ImageButton
             android:id="@+id/btn_save"
@@ -102,8 +103,9 @@
             android:layout_height="30dp"
             android:backgroundTint="@color/transparent"
             android:src="@drawable/baseline_save_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_delete" />
+            app:layout_constraintBottom_toBottomOf="@+id/til_marker_title"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/btn_delete"
@@ -111,8 +113,9 @@
             android:layout_height="30dp"
             android:backgroundTint="@color/transparent"
             android:src="@drawable/baseline_delete_forever_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/btn_save"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_save" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -53,7 +53,7 @@ class MapFragment : Fragment() {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED)
             ) {
-                isMyLocationEnabled = true
+            //    isMyLocationEnabled = true
             }
 
             uiSettings.isZoomControlsEnabled = true // добавить кнопки zoom[+][-]
@@ -62,19 +62,20 @@ class MapFragment : Fragment() {
 
             setOnMapLongClickListener { location ->
                 val address = geocoder.getCityNameByLocation(location)
-                if(address==null){
-                    viewModel.addMarker(location,"no city found","")
-                }else {
+                if (address == null) {
+                    viewModel.addMarker(location, "no city found", "")
+                } else {
+                    val name = (address.subAdminArea ?: "-").plus(" (${address.adminArea?:"-"})")
                     viewModel.addMarker(
                         location,
-                        address.subAdminArea ?: address.adminArea ?: "no name found",
+                        name,
                         "$address"
                     )
                 }
             }
 
             setOnMarkerClickListener { marker ->
-            //    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.position, ZOOM_VALUE))
+                //    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.position, ZOOM_VALUE))
                 showSnackbarWithAction(
                     marker.title.toString(), "Удалить маркер"
                 ) {
