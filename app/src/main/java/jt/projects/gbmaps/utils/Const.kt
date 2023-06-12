@@ -1,3 +1,3 @@
 package jt.projects.gbmaps.utils
 
-const val LOG_TAG="TAG"
+const val LOG_TAG = "TAG"

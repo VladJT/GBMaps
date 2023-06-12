@@ -1,15 +1,15 @@
 package jt.projects.gbmaps.ui.map
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.location.Geocoder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -18,55 +18,67 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
 import jt.projects.gbmaps.R
+import jt.projects.gbmaps.core.MyGeocoder
 import jt.projects.gbmaps.databinding.FragmentMapBinding
-import jt.projects.gbmaps.utils.showSnackBar
 import jt.projects.gbmaps.utils.showSnackbar
-import java.util.Locale
+import jt.projects.gbmaps.viewmodel.MapViewModel
+import org.koin.android.ext.android.inject
 
 class MapFragment : Fragment() {
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
 
-    private val geocoder by lazy { Geocoder(requireContext(), Locale("ru_RU")) }
+    private val geocoder by inject<MyGeocoder>()
+
     private lateinit var map: GoogleMap
-    private val markers = mutableListOf<Marker>()
+
+    private val viewModel by lazy {
+        ViewModelProvider(this)[MapViewModel::class.java] // переживает создание активити
+    }
 
 
+    @SuppressLint("MissingPermission")
     private val callback = OnMapReadyCallback { googleMap ->
         val location = LatLng(68.9792, 33.0925)
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true // добавить кнопки zoom[+][-]
-            if (ActivityCompat.checkSelfPermission(
+
+            if ((ActivityCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(
+                ) == PackageManager.PERMISSION_GRANTED) ||
+                (ActivityCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+                ) == PackageManager.PERMISSION_GRANTED)
             ) {
                 isMyLocationEnabled = true
             }
             uiSettings.isMyLocationButtonEnabled = true
-            addMarker(MarkerOptions().position(location).title("Marker in Murmansk"))
+            uiSettings.isMapToolbarEnabled = true
+
+            viewModel.liveDataToObserve.observe(viewLifecycleOwner) { markers ->
+                markers.forEach {
+                    googleMap.addMarker(it)
+                }
+            }
+
+            viewModel.addMarker(location, "Marker in Murmansk")
             moveCamera(CameraUpdateFactory.newLatLng(location))
 
-            setOnMapLongClickListener {
-                addMarkerToArray(it)
-//                drawLine()
+            setOnMapLongClickListener { location ->
+                viewModel.addMarker(location, geocoder.getCityNameByLocation(location))
             }
 
-            setOnMarkerClickListener {
-                val location = it.position
-                val result = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                    ?.get(0)?.locality
-                showSnackbar(result.toString())
-                true
-            }
+
+//                viewModel.removeMarker(it.position)
+//                it.remove()
+//                true
+
         }
+
 
         map = googleMap
     }
@@ -85,14 +97,15 @@ class MapFragment : Fragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
-        setButtonSearchListener()
+        setButtonSearchAddressListener()
+
     }
 
-    private fun setButtonSearchListener() {
+    private fun setButtonSearchAddressListener() {
         binding.buttonSearchAddress.setOnClickListener {
             binding.editTextAddress.text.toString().let {
                 try {
-                    val result = geocoder.getFromLocationName(it, 1)
+                    val result = geocoder.getAddressByLocation(it, 1)
 
                     if (result != null && result.size > 0) {
                         val location = LatLng(result.first().latitude, result.first().longitude)
@@ -100,10 +113,10 @@ class MapFragment : Fragment() {
                         map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 6f))
 
                     } else {
-                        binding.root.showSnackBar("Адрес не найден")
+                        showSnackbar("Адрес не найден")
                     }
                 } catch (e: Exception) {
-                    binding.root.showSnackBar("Ошибка: ".plus(e.message))
+                    showSnackbar("Ошибка: ".plus(e.message))
                 }
             }
         }
@@ -117,24 +130,25 @@ class MapFragment : Fragment() {
         )!!
     }
 
-    private fun addMarkerToArray(location: LatLng) {
-        val marker = setMarker(location, markers.size.toString(), R.drawable.ic_map_pin)
-        markers.add(marker)
-    }
+//    private fun addMarkerToArray(location: LatLng) {
+//        val marker = setMarker(location, markers.size.toString(), R.drawable.ic_map_pin)
+//        markers.add(marker)
+//    }
 
-    private fun drawLine() {
-        val last: Int = markers.size - 1
-        if (last >= 1) {
-            val previous: LatLng = markers[last - 1].position
-            val current: LatLng = markers[last].position
-            map.addPolyline(
-                PolylineOptions()
-                    .add(previous, current)
-                    .color(Color.RED)
-                    .width(15f)
-            )
-        }
-    }
+//    private fun drawLine() {
+//        val last: Int = markers.size - 1
+//        if (last >= 1) {
+//            val previous: LatLng = markers[last - 1].position
+//            val current: LatLng = markers[last].position
+//            map.addPolyline(
+//                PolylineOptions()
+//                    .add(previous, current)
+//                    .color(Color.RED)
+//                    .width(15f)
+//            )
+//        }
+//    }
+
 
     override fun onDestroy() {
         _binding = null

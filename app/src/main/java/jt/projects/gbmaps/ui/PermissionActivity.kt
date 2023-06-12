@@ -80,7 +80,7 @@ open class PermissionActivity : AppCompatActivity() {
                     } else {
                         if (!shouldShowRequestPermissionRationale(permissions[pIndex])) {
                             showGoSettings()
-                        }else {
+                        } else {
                             onFailed.invoke()
                         }
                     }

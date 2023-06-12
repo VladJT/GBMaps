@@ -7,11 +7,9 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 
 
-
-fun View.showSnackBar(text :String) {
+fun View.showSnackBar(text: String) {
     Snackbar.make(this, text, Snackbar.LENGTH_SHORT).show()
 }
-
 
 
 /**
